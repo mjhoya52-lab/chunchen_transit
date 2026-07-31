@@ -1,0 +1,10 @@
+.next/
+out/
+dist/
+node_modules/
+.tools/
+.gitdata/
+.venv/
+__pycache__/
+data/*.backup.xlsx
+*.log
