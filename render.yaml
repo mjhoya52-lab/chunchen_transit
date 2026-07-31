@@ -3,4 +3,4 @@ services:
     name: chunchen-transit
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --chdir transit/web app:app
+    startCommand: gunicorn --chdir transit/web --timeout 120 app:app
