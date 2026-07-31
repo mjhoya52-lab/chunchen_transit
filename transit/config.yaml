@@ -68,8 +68,7 @@ realtime:
 
   # 한 경로당 호출이 아니라 동일 정류장·노선은 실행 중 캐시합니다.
   # API 호출량 보호를 위해 상위 경로만 실시간 보강합니다.
-  # max_routes_to_enrich: 100
-  max_routes_to_enrich: 0
+  max_routes_to_enrich: 100
 
   timeout_seconds: 8
 
