@@ -1065,9 +1065,7 @@ def apply_realtime_predictions(
     ))
     if lookup_node_ids:
         with ThreadPoolExecutor(
-            # 외부 요청은 I/O 대기 작업이므로 충분히 병렬 처리해
-            # Render의 HTTP 응답 제한 시간 안에 전체 후보를 보강한다.
-            max_workers=min(40, len(lookup_node_ids))
+            max_workers=min(20, len(lookup_node_ids))
         ) as executor:
             futures = [
                 executor.submit(
