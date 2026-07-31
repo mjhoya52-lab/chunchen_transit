@@ -360,10 +360,7 @@ async function searchRoutes() {
         destination: $("#destination").value,
       }),
     });
-    const contentType = response.headers.get("content-type") || "";
-    const payload = contentType.includes("application/json")
-      ? await response.json()
-      : { error: "서버가 예상하지 못한 응답을 반환했습니다. 잠시 후 다시 시도해주세요." };
+    const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "경로 조회 실패");
     state.data = payload;
     state.receivedAt = Date.now();

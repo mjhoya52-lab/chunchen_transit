@@ -1058,21 +1058,25 @@ def apply_realtime_predictions(
 
     # 표시 가능성이 높은 후보만 대상으로 중복 요청을 제거한 뒤 병렬 조회한다.
     # 이후 build_realtime_predictions는 클라이언트 캐시를 사용하므로 추가 호출이 없다.
-    lookup_node_ids = list(dict.fromkeys(
-        str(segment["boarding_stop"]["node_id"])
+    lookup_pairs = list(dict.fromkeys(
+        (
+            str(segment["boarding_stop"]["node_id"]),
+            str(segment["route_id"]),
+        )
         for result in route_results[:max_routes_to_enrich]
         for segment in result["segments"]
     ))
-    if lookup_node_ids:
+    if lookup_pairs:
         with ThreadPoolExecutor(
-            max_workers=min(20, len(lookup_node_ids))
+            max_workers=min(8, len(lookup_pairs))
         ) as executor:
             futures = [
                 executor.submit(
-                    realtime_client.get_stop_arrivals,
+                    realtime_client.get_route_arrivals,
                     node_id,
+                    route_id,
                 )
-                for node_id in lookup_node_ids
+                for node_id, route_id in lookup_pairs
             ]
             for future in futures:
                 try:
