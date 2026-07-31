@@ -41,31 +41,28 @@ class ChuncheonBisRealtimeClient:
     ) -> None:
         self.timeout_seconds = float(timeout_seconds)
         self.cache_ttl_seconds = max(float(cache_ttl_seconds), 0)
-        self._arrival_cache = {}
-        self._arrival_cache_times = {}
+        self._station_arrival_cache = {}
+        self._station_arrival_cache_times = {}
 
     @property
     def is_configured(self) -> bool:
         return True
 
-    def get_route_arrivals(
-        self,
-        node_id: str,
-        route_id: str,
-    ) -> list[dict]:
-        cache_key = (str(node_id), str(route_id))
-        cached_at = self._arrival_cache_times.get(cache_key)
+    def get_stop_arrivals(self, node_id: str) -> list[dict]:
+        """정류소의 전체 도착정보를 한 번만 조회해 노선별로 재사용한다."""
+        station_id = str(node_id)
+        cached_at = self._station_arrival_cache_times.get(station_id)
         if (
-            cache_key in self._arrival_cache
+            station_id in self._station_arrival_cache
             and cached_at is not None
             and time.monotonic() - cached_at <= self.cache_ttl_seconds
         ):
-            return self._arrival_cache[cache_key]
+            return self._station_arrival_cache[station_id]
 
         try:
             response = requests.get(
                 CHUNCHEON_BIS_ARRIVAL_URL,
-                params={"entity.stationId": str(node_id)},
+                params={"entity.stationId": station_id},
                 timeout=self.timeout_seconds,
             )
             response.raise_for_status()
@@ -80,8 +77,17 @@ class ChuncheonBisRealtimeClient:
                 "춘천버스GO BIS 도착정보 응답 형식이 올바르지 않습니다."
             )
 
+        self._station_arrival_cache[station_id] = payload
+        self._station_arrival_cache_times[station_id] = time.monotonic()
+        return payload
+
+    def get_route_arrivals(
+        self,
+        node_id: str,
+        route_id: str,
+    ) -> list[dict]:
         results = []
-        for item in payload:
+        for item in self.get_stop_arrivals(node_id):
             if not isinstance(item, dict):
                 continue
             item_route_id = str(item.get("entityId", "")).strip()
@@ -107,8 +113,6 @@ class ChuncheonBisRealtimeClient:
             })
 
         results.sort(key=lambda item: item["arrival_seconds"])
-        self._arrival_cache[cache_key] = results
-        self._arrival_cache_times[cache_key] = time.monotonic()
         return results
 
     def build_realtime_predictions(
