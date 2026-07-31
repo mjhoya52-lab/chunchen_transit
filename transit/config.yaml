@@ -3,10 +3,10 @@
 
 data:
   # 전체 왕복 정류장 목록과 누적예상시간이 들어 있는 CSV
-  route_stops_csv: "C:/Users/레브잇/PycharmProjects/chuncheon/transit_data/chuncheon_bus_route_stops_latest.csv"
+  route_stops_csv: "../transit_data/chuncheon_bus_route_stops_latest.csv"
 
   # 방향별 기점 출발시간 CSV
-  timetable_csv: "C:/Users/레브잇/PycharmProjects/chuncheon/transit_data/춘천시_버스_출발_시간_데이터.csv"
+  timetable_csv: "../transit_data/춘천시_버스_출발_시간_데이터.csv"
 
 
 routing:

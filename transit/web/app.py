@@ -2,6 +2,7 @@
 
 """Chuncheon bus recommendation web application."""
 
+import os
 import sys
 
 from datetime import datetime
@@ -100,7 +101,14 @@ def load_config() -> dict:
         "r",
         encoding="utf-8",
     ) as file:
-        return yaml.safe_load(file)
+        config = yaml.safe_load(file)
+
+    for key in ("route_stops_csv", "timetable_csv"):
+        path = Path(config["data"][key])
+        if not path.is_absolute():
+            config["data"][key] = str((TRANSIT_ROOT / path).resolve())
+
+    return config
 
 
 def format_clock(value: datetime | None) -> str | None:
@@ -394,4 +402,8 @@ def route_api():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "5000")),
+        debug=False,
+    )
